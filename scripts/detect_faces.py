@@ -6,7 +6,6 @@ from multiprocessing import Pool, cpu_count
 def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
     """
     Detect faces in a frame and save cropped face(s).
-    MTCNN is initialized inside this function to avoid multiprocessing issues.
     """
     try:
         from facenet_pytorch import MTCNN
@@ -16,9 +15,9 @@ def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
         boxes, _ = mtcnn.detect(img)
 
         if boxes is None:
-            return 0  # No face detected
+            return 0 # CONDITION WHERE NO FACE IS DETECTED
 
-        # Determine label (fake or real) from path
+        # DETERMINE LABEL (FAKE OR REAL) FROM PATH
         label = "fake" if "fake" in frame_path.lower() else "real"
         video_name = os.path.basename(os.path.dirname(frame_path))
         output_dir = os.path.join(faces_root, label, video_name)
@@ -26,7 +25,6 @@ def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
 
         for i, box in enumerate(boxes):
             x1, y1, x2, y2 = [int(b) for b in box]
-            # Add margin
             x1 = max(0, x1 - margin)
             y1 = max(0, y1 - margin)
             x2 = min(img.width, x2 + margin)
@@ -39,7 +37,7 @@ def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
         return len(boxes)
 
     except Exception as e:
-        print(f"Error processing {frame_path}: {e}")
+        print(f"ERROR PROCESSING {frame_path}: {e}")
         return 0
 
 def process_frame(args):
@@ -49,20 +47,19 @@ def process_frame(args):
 def detect_faces_from_frames(frames_root="data/intermediate/frames",
                              faces_root="data/intermediate/faces",
                              num_workers=None):
-    # Collect all frame paths
     frame_paths = []
     for root, _, files in os.walk(frames_root):
         for file in files:
             if file.lower().endswith(".jpg"):
                 frame_paths.append(os.path.join(root, file))
 
-    print(f"Found {len(frame_paths)} frames for face detection.")
+    print(f"FOUND {len(frame_paths)} FRAMES FOR FACE DETECTION.")
     os.makedirs(faces_root, exist_ok=True)
 
     num_workers = num_workers or max(1, cpu_count() - 2)
-    print(f"Using {num_workers} CPU cores for face detection.\n")
+    print(f"USING {num_workers} CPU CORES FOR FACE DETECTION.\n")
 
-    # Multiprocessing pool
+    # MULTIPROCESSING POOL
     with Pool(num_workers) as pool:
         list(
             tqdm(
@@ -71,11 +68,11 @@ def detect_faces_from_frames(frames_root="data/intermediate/frames",
                     [(fp, faces_root) for fp in frame_paths]
                 ),
                 total=len(frame_paths),
-                desc="Detecting faces"
+                desc="DETECTING FACES"
             )
         )
 
-    print("\n✅ Face detection and cropping completed!")
+    print("\nFACE DETECTION & CROPPING COMPLETED.")
 
 if __name__ == "__main__":
     import argparse

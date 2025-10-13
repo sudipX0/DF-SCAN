@@ -59,11 +59,11 @@ def extract_frames_from_videos(input_dir: str, output_dir: str, fps: int = 5, nu
             if file.lower().endswith((".mp4", ".avi", ".mov", ".mkv")):
                 video_paths.append(os.path.join(root, file))
 
-    print(f"📂 Found {len(video_paths)} videos in {input_dir}")
+    print(f"FOUND {len(video_paths)} VIDEOS IN {input_dir}")
     os.makedirs(output_dir, exist_ok=True)
 
     num_workers = num_workers or max(1, cpu_count() - 2)
-    print(f"⚙️ Using {num_workers} CPU cores for parallel extraction\n")
+    print(f"USING {num_workers} CPU CORES FOR PARALLEL EXTRACTION\n")
 
     with Pool(num_workers) as pool:
         list(
@@ -73,40 +73,40 @@ def extract_frames_from_videos(input_dir: str, output_dir: str, fps: int = 5, nu
                     [(vp, output_dir, fps) for vp in video_paths]
                 ),
                 total=len(video_paths),
-                desc="🎞️ Extracting frames"
+                desc="EXTRACTING FRAMES"
             )
         )
 
-    print("\n✅ Frame extraction completed!")
+    print("\nFRAME EXTRACTION COMPLETED.")
 
 
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Extract frames from FaceForensics++ videos")
+    parser = argparse.ArgumentParser(description="EXTRACT FRAMES FROM FACEFORENSICS++ VIDEOS.")
     parser.add_argument(
         "--input_dir",
         type=str,
         default="data/raw/ff-c23/FaceForensics++_C23",
-        help="Path to FaceForensics++ dataset root"
+        help="PATH TO FACEFORENSICS++ DATASET ROOT"
     )
     parser.add_argument(
         "--output_dir",
         type=str,
         default="data/intermediate/frames",
-        help="Where to store extracted frames"
+        help="WHERE TO STORE EXTRACTED FRAMES"
     )
     parser.add_argument(
         "--fps",
         type=int,
         default=5,
-        help="Frames per second to extract from each video"
+        help="FRAMES PER SECOND TO EXTRACT FROM EACH VIDEO"
     )
     parser.add_argument(
         "--workers",
         type=int,
         default=None,
-        help="Number of CPU cores to use (default: all but 2)"
+        help="NUMBER OF CPU CORES TO USE (DEFAULT: ALL BUT 2)"
     )
 
     args = parser.parse_args()
