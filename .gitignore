@@ -216,10 +216,4 @@ __marimo__/
 .streamlit/secrets.toml
 
 # FaceForensics++_C23
-ff-c23/FaceForensics++_C23/DeepFakeDetection/
-ff-c23/FaceForensics++_C23/Deepfakes/
-ff-c23/FaceForensics++_C23/Face2Face/
-ff-c23/FaceForensics++_C23/FaceShifter/
-ff-c23/FaceForensics++_C23/FaceSwap/
-ff-c23/FaceForensics++_C23/NeuralTextures/
-ff-c23/FaceForensics++_C23/original/
+data/
