@@ -10,22 +10,23 @@ def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
     try:
         import torch
         from facenet_pytorch import MTCNN
-        
-        # USE GPU IF AVAILABLE
+
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         mtcnn = MTCNN(keep_all=True, device=device)
-
 
         img = Image.open(frame_path).convert("RGB")
         boxes, _ = mtcnn.detect(img)
 
         if boxes is None:
-            return 0 # CONDITION WHERE NO FACE IS DETECTED
+            return 0
 
-        # DETERMINE LABEL (FAKE OR REAL) FROM PATH
+        # Determine label
         label = "fake" if "fake" in frame_path.lower() else "real"
+        # Include method name to avoid collisions
+        method_name = os.path.basename(os.path.dirname(os.path.dirname(frame_path)))
         video_name = os.path.basename(os.path.dirname(frame_path))
-        output_dir = os.path.join(faces_root, label, video_name)
+        unique_video_id = f"{method_name}_{video_name}"
+        output_dir = os.path.join(faces_root, label, unique_video_id)
         os.makedirs(output_dir, exist_ok=True)
 
         for i, box in enumerate(boxes):
@@ -45,9 +46,11 @@ def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
         print(f"ERROR PROCESSING {frame_path}: {e}")
         return 0
 
+
 def process_frame(args):
     frame_path, faces_root = args
     return detect_and_crop_face(frame_path, faces_root)
+
 
 def detect_faces_from_frames(frames_root="data/intermediate/frames",
                              faces_root="data/intermediate/faces",
@@ -64,7 +67,6 @@ def detect_faces_from_frames(frames_root="data/intermediate/frames",
     num_workers = num_workers or max(1, cpu_count() - 2)
     print(f"USING {num_workers} CPU CORES FOR FACE DETECTION.\n")
 
-    # MULTIPROCESSING POOL
     with Pool(num_workers) as pool:
         list(
             tqdm(
@@ -78,6 +80,7 @@ def detect_faces_from_frames(frames_root="data/intermediate/frames",
         )
 
     print("\nFACE DETECTION & CROPPING COMPLETED.")
+
 
 if __name__ == "__main__":
     import argparse
