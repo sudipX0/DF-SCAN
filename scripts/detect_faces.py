@@ -8,8 +8,13 @@ def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
     Detect faces in a frame and save cropped face(s).
     """
     try:
+        import torch
         from facenet_pytorch import MTCNN
-        mtcnn = MTCNN(keep_all=True)
+        
+        # USE GPU IF AVAILABLE
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        mtcnn = MTCNN(keep_all=True, device=device)
+
 
         img = Image.open(frame_path).convert("RGB")
         boxes, _ = mtcnn.detect(img)
