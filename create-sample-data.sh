@@ -1,7 +1,7 @@
 #!/bin/bash
 
 RAW_DATA=~/DF-SCAN/data/raw/ff-c23/FaceForensics++_C23
-SAMPLE_DATA=~/DF-SCAN/sample-data/raw/ff-c23/FaceForensics++_C23
+SAMPLE_DATA=~/DF-SCAN/data/experiment_100/ff-c23/FaceForensics++_C23
 
 mkdir -p $SAMPLE_DATA
 
