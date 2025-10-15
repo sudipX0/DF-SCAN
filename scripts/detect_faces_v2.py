@@ -1,27 +1,29 @@
 import os
+import cv2
 from PIL import Image
 from tqdm import tqdm
 from multiprocessing import Pool, cpu_count
+import face_recognition
+
 
 def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
     """
-    Detect faces in a frame and save cropped face(s).
+    Detect faces in a frame using face_recognition and save cropped face(s).
     """
     try:
-        import torch
-        from facenet_pytorch import MTCNN
-
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        mtcnn = MTCNN(keep_all=True, device=device)
-
-        img = Image.open(frame_path).convert("RGB")
-        boxes, _ = mtcnn.detect(img)
-
-        if boxes is None:
+        img = cv2.imread(frame_path)
+        if img is None:
             return 0
 
-        # Determine label
+        rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        boxes = face_recognition.face_locations(rgb_img, model='hog')  # fast on CPU
+
+        if not boxes:
+            return 0
+
+        # Determine label (real/fake)
         label = "fake" if "fake" in frame_path.lower() else "real"
+
         # Include method name to avoid collisions
         method_name = os.path.basename(os.path.dirname(os.path.dirname(frame_path)))
         video_name = os.path.basename(os.path.dirname(frame_path))
@@ -29,18 +31,24 @@ def detect_and_crop_face(frame_path, faces_root, margin=20, image_size=224):
         output_dir = os.path.join(faces_root, label, unique_video_id)
         os.makedirs(output_dir, exist_ok=True)
 
-        for i, box in enumerate(boxes):
-            x1, y1, x2, y2 = [int(b) for b in box]
-            x1 = max(0, x1 - margin)
-            y1 = max(0, y1 - margin)
-            x2 = min(img.width, x2 + margin)
-            y2 = min(img.height, y2 + margin)
+        count = 0
+        for (top, right, bottom, left) in boxes:
+            # Add margin
+            top = max(0, top - margin)
+            left = max(0, left - margin)
+            bottom = min(img.shape[0], bottom + margin)
+            right = min(img.shape[1], right + margin)
 
-            face_crop = img.crop((x1, y1, x2, y2)).resize((image_size, image_size))
+            face_crop = img[top:bottom, left:right]
+            if face_crop.size == 0:
+                continue
+
+            face_crop = cv2.resize(face_crop, (image_size, image_size))
             base_name = os.path.splitext(os.path.basename(frame_path))[0]
-            face_crop.save(os.path.join(output_dir, f"{base_name}_face_{i}.jpg"))
+            cv2.imwrite(os.path.join(output_dir, f"{base_name}_face_{count}.jpg"), face_crop)
+            count += 1
 
-        return len(boxes)
+        return count
 
     except Exception as e:
         print(f"ERROR PROCESSING {frame_path}: {e}")
@@ -85,7 +93,7 @@ def detect_faces_from_frames(frames_root="data/intermediate/frames",
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Detect and crop faces from frames")
+    parser = argparse.ArgumentParser(description="Detect and crop faces from frames (face_recognition)")
     parser.add_argument("--frames_root", type=str, default="data/intermediate/frames",
                         help="Folder with extracted frames")
     parser.add_argument("--faces_root", type=str, default="data/intermediate/faces",
@@ -97,4 +105,7 @@ if __name__ == "__main__":
     detect_faces_from_frames(args.frames_root, args.faces_root, args.workers)
 
 
-# python scripts/detect_faces.py   --frames_root ~/DF-SCAN/data/intermediate_100/frames   --faces_root ~/DF-SCAN/data/intermediate_100/faces   --workers 6
+# python scripts/detect_faces_v2.py \
+#     --frames_root ~/DF-SCAN/data/intermediate_100/frames \
+#     --faces_root ~/DF-SCAN/data/intermediate_100/faces \
+#     --workers 6
