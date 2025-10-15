@@ -96,3 +96,5 @@ if __name__ == "__main__":
     args.output_dir = os.path.expanduser(args.output_dir)
 
     extract_frames_from_videos(args.input_dir, args.output_dir, args.fps, args.workers)
+
+# python scripts/extract_frames.py   --input_dir ~/DF-SCAN/data/experiment_100/ff-c23/FaceForensics++_C23   --output_dir ~/DF-SCAN/data/intermediate_100/frames   --fps 5

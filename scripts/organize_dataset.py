@@ -59,3 +59,6 @@ if __name__ == "__main__":
     
     split_dataset_by_video(args.faces_root, args.output_root,
                            args.train_ratio, args.val_ratio, args.test_ratio, args.seed)
+
+
+# python3 scripts/organize_dataset.py   --faces_root data/intermediate_100/faces   --output_root data/processed_100

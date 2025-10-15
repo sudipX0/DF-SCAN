@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deepfake Detection Live</title>
+</head>
+<body>
+<h2>Upload Video for Deepfake Detection</h2>
+<input type="file" id="videoFile">
+<button onclick="startProcessing()">Check Video</button>
+
+<p id="status">Status: Waiting for upload</p>
+<progress id="progressBar" value="0" max="100" style="width:500px;"></progress>
+<p id="result"></p>
+<canvas id="videoCanvas" width="480" height="270"></canvas>
+
+<script>
+function startProcessing() {
+    const file = document.getElementById("videoFile").files[0];
+    if(!file){ alert("Select a video!"); return; }
+
+    const status = document.getElementById("status");
+    const progress = document.getElementById("progressBar");
+    const result = document.getElementById("result");
+    const canvas = document.getElementById("videoCanvas");
+    const ctx = canvas.getContext("2d");
+
+    status.innerText = "Uploading video...";
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const file_bytes = reader.result;
+        const ws = new WebSocket("ws://127.0.0.1:8000/ws/process_video");
+
+        ws.onopen = () => {
+            ws.send(JSON.stringify({
+                "file_name": file.name,
+                "file_bytes": file_bytes
+            }));
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if(data.step === "extract_frame"){
+                let img = new Image();
+                img.src = "data:image/jpeg;base64," + data.frame_b64;
+                img.onload = () => ctx.drawImage(img,0,0,canvas.width,canvas.height);
+                status.innerText = `Extracting frames: ${data.frame_index}/${data.total_frames}`;
+                progress.value = ((data.frame_index/data.total_frames)*100).toFixed(2);
+            }
+            else if(data.step === "face_detected"){
+                let img = new Image();
+                img.src = "data:image/jpeg;base64," + data.frame_b64;
+                img.onload = () => ctx.drawImage(img,0,0,canvas.width,canvas.height);
+                status.innerText = `Detecting faces: ${data.frame_index}/${data.total_frames}`;
+            }
+            else if(data.step === "finished"){
+                status.innerText = "Processing finished!";
+                result.innerText = `Prediction: ${data.label} | Confidence: ${data.confidence}`;
+            }
+        };
+    };
+    reader.readAsBinaryString(file);
+}
+</script>
+</body>
+</html>

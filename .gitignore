@@ -218,3 +218,5 @@ __marimo__/
 # FaceForensics++_C23
 data/
 sample-data/
+backend/processed_videos/
+backend/uploaded_videos/
