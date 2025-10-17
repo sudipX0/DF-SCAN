@@ -21,7 +21,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = models.efficientnet_b0(pretrained=False)
 num_features = model.classifier[1].in_features
 model.classifier[1] = torch.nn.Linear(num_features, 2)
-model.load_state_dict(torch.load("best_model.pth", map_location=device))
+model.load_state_dict(torch.load("/home/sudeep/DF-SCAN/models/baseline_model.pth", map_location=device))
 model = model.to(device)
 model.eval()
 class_names = ["real", "fake"]
