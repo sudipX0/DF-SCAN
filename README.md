@@ -6,7 +6,7 @@ Hybrid **CNN + LSTM** architecture to train both **spatial (per-frame)** and **t
 
 ## Model Evolution Summary (Currently Experimenting)
 
-| **Model** | **Architecture** | **# Videos** | **Accuracy** | **ROC-AUC** | **REAL F1** | **FAKE F1** | **Key Observation** |
+| **Model** | **Architecture** | **Video Samples** | **Accuracy** | **ROC-AUC** | **REAL F1** | **FAKE F1** | **Key Observation** |
 |------------|------------------|--------------|---------------|--------------|--------------|--------------|----------------------|
 | **Model 1** | ResNet18 (Frame-based Baseline) | 100 | **0.86** | 0.8415 | 0.52 | 0.92 | Strong on fakes, weak on reals; lacks temporal cues |
 | **Model 2** | CNN + LSTM (Temporal Baseline) | 100 | **0.83** | 0.7719 | 0.44 | 0.90 | Added temporal modeling, but underfit due to limited data |
@@ -33,21 +33,5 @@ Hybrid **CNN + LSTM** architecture to train both **spatial (per-frame)** and **t
 - **REAL Class Challenge:**  
   REAL videos remain slightly under-recognized.
 
-## Next Steps
-
-1. **Freeze & Export Final Model:**  
-   Save as `dfscan_resnetlstm_500.pth` or convert to TorchScript for deployment.  
-
-2. **Backend API (FastAPI):**  
-   Handle video upload → preprocess frames → run inference → return JSON results.  
-
-3. **Frontend (React):**  
-   Simple interface for video upload, progress indicator, and a confidence-based real/fake output visualization.  
-
-4. **Future Work:**  
-   - Try bidirectional LSTM for richer temporal encoding.  
-   - Explore stronger backbones (ResNet34, EfficientNet).  
-   - Integrate attention or transformer-based temporal modules.  
-   
 My experimentation demonstrates how combining **spatial feature extraction** with **temporal dynamics** can yield a highly reliable, end-to-end deepfake detection pipeline.
 
