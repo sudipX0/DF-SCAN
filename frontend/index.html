@@ -5,53 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DF-SCAN - Deepfake Detection</title>
   <link rel="stylesheet" href="style.css">
+  <meta name="color-scheme" content="dark light">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' ry='12' fill='%232563eb'/%3E%3Ctext x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, Helvetica, sans-serif' font-size='28' fill='white'%3EDF%3C/text%3E%3C/svg%3E" />
+  
 </head>
 <body>
-  <div class="container">
-    <h1>DF-SCAN - Deepfake Detection</h1>
+  <header class="app-header container">
+    <h1>DF-SCAN</h1>
+    <p class="subtitle">Upload a video to detect deepfakes with live progress</p>
+  </header>
 
-    <!-- Video upload -->
-    <div class="upload-section">
-      <input type="file" id="videoInput" accept="video/*">
-      <button id="scanBtn">Upload & Scan</button>
+  <div class="layout container">
+    <div class="left-pane">
+      <section class="uploader">
+        <div id="dropzone" class="dropzone" tabindex="0">
+          <input id="fileInput" type="file" accept="video/*" hidden />
+          <div class="drop-hint">
+            <strong>Drag & drop</strong> a video here or
+            <button id="browseBtn" class="btn">Browse</button>
+          </div>
+          <div id="fileInfo" class="file-info"></div>
+        </div>
+
+        <div class="controls">
+          <button id="startBtn" class="btn primary" disabled>Start Scan</button>
+          <button id="cancelBtn" class="btn danger" disabled>Cancel</button>
+          <button id="clearBtn" class="btn" disabled>Clear</button>
+          <button id="retryBtn" class="btn" hidden>Retry</button>
+        </div>
+
+        <div id="errorBanner" class="error-banner" hidden></div>
+      </section>
+
+      <section class="progress">
+        <div class="stages">
+          <span id="stage-frames" class="stage-badge pending">Frames</span>
+          <span id="stage-faces" class="stage-badge pending">Faces</span>
+          <span id="stage-inference" class="stage-badge pending">Inference</span>
+        </div>
+        <div class="progressbar">
+          <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+        </div>
+        <div id="progressText" class="progress-text">Idle</div>
+      </section>
+
+      <section class="result" id="resultSection" hidden>
+        <h3>Result</h3>
+        <div id="resultText" class="result-text"></div>
+      </section>
     </div>
 
-    <!-- Uploaded video preview -->
-    <div class="video-preview">
-      <video id="uploadedVideo" width="480" height="270" controls style="display:none;"></video>
-    </div>
-
-    <!-- Progress log -->
-    <div class="log-section">
-      <h3>Progress Log</h3>
-      <div id="progressLog" class="progress-log"></div>
-    </div>
-
-    <!-- Frame previews -->
-    <div class="preview-section">
-      <h3>Extracted Frames</h3>
-      <div id="framesPreview" class="preview-container"></div>
-    </div>
-
-    <!-- Face detection previews -->
-    <div class="preview-section">
-      <h3>Faces Detected (Bounding Boxes)</h3>
-      <div id="facePreview" class="preview-container"></div>
-    </div>
-
-    <!-- Cropped faces -->
-    <div class="preview-section">
-      <h3>Cropped Faces</h3>
-      <div id="croppedPreview" class="preview-container"></div>
-    </div>
-
-    <!-- Final prediction -->
-    <div class="prediction-section">
-      <h3>Prediction</h3>
-      <div id="finalResult" class="final-result"></div>
+    <div class="right-pane">
+      <section class="live-view">
+        <div class="live-header">
+          <h3>Live Detection</h3>
+        </div>
+        <div class="live-flex">
+          <div class="live-frame-wrap">
+            <img id="liveFrame" alt="Live frame" />
+            <div id="liveStatus" class="live-status">Idle</div>
+          </div>
+          <div class="live-side">
+            <div class="side-label">Detected face</div>
+            <div class="live-current-crop" id="liveCurrentCrop"></div>
+          </div>
+        </div>
+        <div class="video-preview">
+          <h4 style="margin:10px 0 6px; color: var(--muted);">Uploaded video preview</h4>
+          <video id="uploadedVideoMain" controls muted playsinline style="width:100%; max-height:240px; background:#000; border-radius:8px;"></video>
+        </div>
+      </section>
     </div>
   </div>
 
   <script src="script.js"></script>
+  <!-- Legacy elements kept hidden for backwards compat -->
+  <div style="display:none">
+    <input type="file" id="videoInput" accept="video/*">
+    <button id="scanBtn">Upload & Scan</button>
+    <div id="progressLog" class="progress-log"></div>
+    <div id="framesPreview" class="preview-container"></div>
+    <div id="facePreview" class="preview-container"></div>
+    <div id="croppedPreview" class="preview-container"></div>
+    <div id="finalResult" class="final-result"></div>
+    <video id="uploadedVideo" width="480" height="270" controls style="display:none;"></video>
+  </div>
+  
 </body>
 </html>

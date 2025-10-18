@@ -26,3 +26,16 @@ def predict_from_faces(model, faces_dir, device):
         conf, pred = torch.max(probs, dim=1)
     label = "FAKE" if pred.item()==1 else "REAL"
     return {"prediction": label, "confidence": float(conf.item())}
+
+
+def predict_image(model, image_path, device):
+    """Predict a single face crop using the video model with sequence length 1."""
+    model.eval()
+    img = Image.open(image_path).convert("RGB")
+    x = val_transform(img).unsqueeze(0).unsqueeze(0).to(device)  # [1,1,3,224,224]
+    with torch.no_grad():
+        logits = model(x)
+        probs = torch.softmax(logits, dim=1)
+        conf, pred = torch.max(probs, dim=1)
+    label = "FAKE" if pred.item() == 1 else "REAL"
+    return {"prediction": label, "confidence": float(conf.item())}
