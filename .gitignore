@@ -221,3 +221,4 @@ sample-data/
 backend/processed_videos/
 backend/uploaded_videos/
 models/
+backend/temp/

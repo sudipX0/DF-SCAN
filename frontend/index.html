@@ -1,66 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Deepfake Detection Live</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DF-SCAN - Deepfake Detection</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h2>Upload Video for Deepfake Detection</h2>
-<input type="file" id="videoFile">
-<button onclick="startProcessing()">Check Video</button>
+  <div class="container">
+    <h1>DF-SCAN - Deepfake Detection</h1>
 
-<p id="status">Status: Waiting for upload</p>
-<progress id="progressBar" value="0" max="100" style="width:500px;"></progress>
-<p id="result"></p>
-<canvas id="videoCanvas" width="480" height="270"></canvas>
+    <!-- Video upload -->
+    <div class="upload-section">
+      <input type="file" id="videoInput" accept="video/*">
+      <button id="scanBtn">Upload & Scan</button>
+    </div>
 
-<script>
-function startProcessing() {
-    const file = document.getElementById("videoFile").files[0];
-    if(!file){ alert("Select a video!"); return; }
+    <!-- Uploaded video preview -->
+    <div class="video-preview">
+      <video id="uploadedVideo" width="480" height="270" controls style="display:none;"></video>
+    </div>
 
-    const status = document.getElementById("status");
-    const progress = document.getElementById("progressBar");
-    const result = document.getElementById("result");
-    const canvas = document.getElementById("videoCanvas");
-    const ctx = canvas.getContext("2d");
+    <!-- Progress log -->
+    <div class="log-section">
+      <h3>Progress Log</h3>
+      <div id="progressLog" class="progress-log"></div>
+    </div>
 
-    status.innerText = "Uploading video...";
+    <!-- Frame previews -->
+    <div class="preview-section">
+      <h3>Extracted Frames</h3>
+      <div id="framesPreview" class="preview-container"></div>
+    </div>
 
-    const reader = new FileReader();
-    reader.onload = () => {
-        const file_bytes = reader.result;
-        const ws = new WebSocket("ws://127.0.0.1:8000/ws/process_video");
+    <!-- Face detection previews -->
+    <div class="preview-section">
+      <h3>Faces Detected (Bounding Boxes)</h3>
+      <div id="facePreview" class="preview-container"></div>
+    </div>
 
-        ws.onopen = () => {
-            ws.send(JSON.stringify({
-                "file_name": file.name,
-                "file_bytes": file_bytes
-            }));
-        };
+    <!-- Cropped faces -->
+    <div class="preview-section">
+      <h3>Cropped Faces</h3>
+      <div id="croppedPreview" class="preview-container"></div>
+    </div>
 
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if(data.step === "extract_frame"){
-                let img = new Image();
-                img.src = "data:image/jpeg;base64," + data.frame_b64;
-                img.onload = () => ctx.drawImage(img,0,0,canvas.width,canvas.height);
-                status.innerText = `Extracting frames: ${data.frame_index}/${data.total_frames}`;
-                progress.value = ((data.frame_index/data.total_frames)*100).toFixed(2);
-            }
-            else if(data.step === "face_detected"){
-                let img = new Image();
-                img.src = "data:image/jpeg;base64," + data.frame_b64;
-                img.onload = () => ctx.drawImage(img,0,0,canvas.width,canvas.height);
-                status.innerText = `Detecting faces: ${data.frame_index}/${data.total_frames}`;
-            }
-            else if(data.step === "finished"){
-                status.innerText = "Processing finished!";
-                result.innerText = `Prediction: ${data.label} | Confidence: ${data.confidence}`;
-            }
-        };
-    };
-    reader.readAsBinaryString(file);
-}
-</script>
+    <!-- Final prediction -->
+    <div class="prediction-section">
+      <h3>Prediction</h3>
+      <div id="finalResult" class="final-result"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

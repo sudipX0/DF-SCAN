@@ -35,3 +35,5 @@ Hybrid **CNN + LSTM** architecture to train both **spatial (per-frame)** and **t
 
 My experimentation demonstrates how combining **spatial feature extraction** with **temporal dynamics** can yield a highly reliable, end-to-end deepfake detection pipeline.
 
+
+
