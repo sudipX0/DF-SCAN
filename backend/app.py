@@ -42,12 +42,53 @@ SESSIONS_ROOT = Path(__file__).resolve().parent / "temp"
 META_FILENAME = "session.json"
 HEARTBEAT_SECONDS = 10
 
-# Basic per-step soft timeouts (seconds)
+# Basic per-step soft timeouts (seconds). Faces will be dynamically scaled below.
 STEP_TIMEOUTS = {
-    "frames": 120,
-    "faces": 180,
-    "inference": 90,
+    "frames": int(os.environ.get("FRAMES_TIMEOUT", "120")),
+    "faces": int(os.environ.get("FACES_BASE_TIMEOUT", "180")),
+    "inference": int(os.environ.get("INFERENCE_TIMEOUT", "90")),
 }
+
+# Dynamic face detection timeout parameters (env-configurable)
+FACES_PER_FRAME_SEC = float(os.environ.get("FACES_PER_FRAME_SEC", "0.9"))
+FACES_RES_SCALE_BASE = float(os.environ.get("FACES_RES_SCALE_BASE", "1.0"))
+FACES_MAX_TIMEOUT = int(os.environ.get("FACES_MAX_TIMEOUT", "3600"))
+FACES_NO_PROGRESS_TIMEOUT = int(os.environ.get("FACES_NO_PROGRESS_TIMEOUT", "180"))
+
+def _estimate_faces_timeout(session: Dict[str, Any]) -> int:
+    """Estimate a reasonable faces stage timeout based on number of frames and resolution.
+    Returns seconds (int), clamped by base and max.
+    """
+    try:
+        frames_dir = session["dirs"]["frames"]
+        total_frames = int(session.get("frames_count") or len([p for p in os.listdir(frames_dir) if p.lower().endswith((".jpg",".jpeg",".png"))]))
+    except Exception:
+        total_frames = int(session.get("frames_count", 0))
+
+    # Resolution factor from first frame if available
+    res_factor = FACES_RES_SCALE_BASE
+    try:
+        first_frame_path = None
+        if session.get("frames"):
+            first_frame_path = session["frames"][0]
+        else:
+            # fallback to any file in frames dir
+            fns = sorted(Path(session["dirs"]["frames"]).glob("*"))
+            if fns:
+                first_frame_path = str(fns[0])
+        if first_frame_path and os.path.exists(first_frame_path):
+            img = cv2.imread(first_frame_path)
+            if img is not None:
+                h, w = img.shape[:2]
+                # Scale factor ~ proportional to megapixels (anchor ~720p ~ 0.9MP => ~1.0)
+                mp = max(0.1, (w * h) / 1_000_000.0)
+                res_factor = max(1.0, min(2.5, FACES_RES_SCALE_BASE * (mp / 0.9)))
+    except Exception:
+        pass
+
+    # Compute timeout: base + per-frame cost scaled by resolution, add small buffer
+    est = int(STEP_TIMEOUTS["faces"] + (total_frames * FACES_PER_FRAME_SEC * res_factor) + 30)
+    return max(STEP_TIMEOUTS["faces"], min(est, FACES_MAX_TIMEOUT))
 
 def _session_dir(sid: str) -> Path:
     return SESSIONS_ROOT / sid
@@ -142,8 +183,24 @@ async def upload_video(file: UploadFile = File(...)):
     return {"session_id": session_id}
 
 @app.post("/scan/{session_id}")
-async def scan_video(session_id: str):
+async def scan_video(session_id: str, request: Request):
     _ensure_app_state()
+    # Allow optional per-request overrides for debugging/tuning
+    try:
+        q = dict(request.query_params)
+        if q:
+            meta_updates = {}
+            if "faces_timeout" in q:
+                meta_updates["faces_timeout_override"] = int(q.get("faces_timeout") or 0)
+            if "frames_timeout" in q:
+                meta_updates["frames_timeout_override"] = int(q.get("frames_timeout") or 0)
+            if "inference_timeout" in q:
+                meta_updates["inference_timeout_override"] = int(q.get("inference_timeout") or 0)
+            if meta_updates:
+                _update_meta(session_id, **meta_updates)
+    except Exception:
+        pass
+
     task = asyncio.create_task(process_video(session_id))
     app.state.tasks[session_id] = task
     return {"message": "Scan started"}
@@ -161,6 +218,7 @@ async def process_video(session_id):
         session["status"] = "Extracting frames..."
         session["stage"] = "frames"
         start_t = time.time()
+        frames_timeout = _load_meta(session_id).get("frames_timeout_override") or STEP_TIMEOUTS["frames"]
         for frame_path in extract_frames(session["video_path"], session["dirs"]["frames"]):
             _ensure_app_state()
             if session_id in app.state.canceled:
@@ -172,7 +230,7 @@ async def process_video(session_id):
             session["frames_count"] = session.get("frames_count", 0) + 1
             session.setdefault("frames", []).append(frame_path)
             await asyncio.sleep(0.01)
-            if time.time() - start_t > STEP_TIMEOUTS["frames"]:
+            if time.time() - start_t > frames_timeout:
                 raise HTTPException(status_code=504, detail="Frame extraction timeout")
 
         # Stage: faces
@@ -182,7 +240,11 @@ async def process_video(session_id):
         _update_meta(session_id, stage="faces")
         session["stage"] = "faces"
 
+        # Faces stage timeouts: dynamic overall and no-progress watchdog
+        faces_override = _load_meta(session_id).get("faces_timeout_override")
+        overall_timeout = faces_override or _estimate_faces_timeout(session)
         start_t = time.time()
+        last_progress = start_t
         for vis_path, crop_paths, boxes in detect_and_crop_faces(
             session["dirs"]["frames"], session["dirs"]["vis"], session["dirs"]["crops"]
         ):
@@ -193,6 +255,8 @@ async def process_video(session_id):
                 _update_meta(session_id, status="canceled", ended_at=time.time())
                 session["done"] = True
                 return
+            # progress heartbeat
+            last_progress = time.time()
             # Per-face predictions and overlay on vis image
             try:
                 preds = []
@@ -219,7 +283,6 @@ async def process_video(session_id):
                         for (top, right, bottom, left), pred in zip(boxes, preds):
                             label = str(pred.get("prediction", "")).upper()
                             conf_val = float(pred.get("confidence", 0.0) or 0.0)
-                            conf_pct = int(round(conf_val * 100))
                             color = (0, 0, 255) if label == "FAKE" else (0, 200, 0)
                             # draw box and confidence value only
                             cv2.rectangle(vis_img, (left, top), (right, bottom), color, 2)
@@ -238,8 +301,13 @@ async def process_video(session_id):
             for cp in crop_paths:
                 session.setdefault("crops", []).append(cp)
             await asyncio.sleep(0.01)
-            if time.time() - start_t > STEP_TIMEOUTS["faces"]:
+            now = time.time()
+            # Overall dynamic timeout
+            if now - start_t > overall_timeout:
                 raise HTTPException(status_code=504, detail="Face detection timeout")
+            # No-progress watchdog (e.g., stuck on a single heavy frame)
+            if now - last_progress > FACES_NO_PROGRESS_TIMEOUT:
+                raise HTTPException(status_code=504, detail="Face detection stalled (no progress)")
 
         # Stage: inference
         session["status"] = "Face detection completed. Cropping faces done. Predicting..."
@@ -251,8 +319,9 @@ async def process_video(session_id):
         async def _run_inf():
             loop = asyncio.get_running_loop()
             return await loop.run_in_executor(None, lambda: predict_from_faces(model, session["dirs"]["crops"], device))
+        infer_timeout = _load_meta(session_id).get("inference_timeout_override") or STEP_TIMEOUTS["inference"]
         try:
-            result = await asyncio.wait_for(_run_inf(), timeout=STEP_TIMEOUTS["inference"])
+            result = await asyncio.wait_for(_run_inf(), timeout=infer_timeout)
         except asyncio.TimeoutError:
             raise HTTPException(status_code=504, detail="Inference timeout")
 

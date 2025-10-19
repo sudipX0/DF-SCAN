@@ -1,7 +1,10 @@
 import os
 import cv2
 import face_recognition
+import os
 
+
+MAX_DETECT_DIM = int(os.environ.get("MAX_DETECT_DIM", "960"))
 
 def detect_and_crop_faces(frames_dir, vis_dir, crop_dir, max_preview=8):
   """
@@ -22,7 +25,22 @@ def detect_and_crop_faces(frames_dir, vis_dir, crop_dir, max_preview=8):
     if img is None:
       continue
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    boxes = face_recognition.face_locations(rgb, model="hog")
+    h, w = rgb.shape[:2]
+    scale = 1.0
+    # Downscale for faster detection on high-res frames
+    if max(h, w) > MAX_DETECT_DIM:
+      scale = MAX_DETECT_DIM / float(max(h, w))
+      new_w = max(1, int(w * scale))
+      new_h = max(1, int(h * scale))
+      small = cv2.resize(rgb, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+      boxes_small = face_recognition.face_locations(small, model="hog")
+      # Map boxes back to original coordinates
+      boxes = []
+      inv = 1.0 / scale
+      for (top, right, bottom, left) in boxes_small:
+        boxes.append((int(top * inv), int(right * inv), int(bottom * inv), int(left * inv)))
+    else:
+      boxes = face_recognition.face_locations(rgb, model="hog")
 
     vis_img = img.copy()
     cropped_faces = []
