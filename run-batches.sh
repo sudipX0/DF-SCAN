@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Array of batch numbers
-batches=(6 7 8)
+batches=(9 10)
 
 # Loop through each batch
 for batch in "${batches[@]}"; do

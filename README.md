@@ -1,4 +1,4 @@
-!["DFSCAN Banner"](banner.png)
+!["DFSCAN Banner"](logo.png)
 
 # DF-SCAN  
 A deepfake video detection system that determines whether a video is **real** or **fake** using deep learning.  
@@ -17,7 +17,7 @@ Hybrid **CNN + LSTM** architecture that captures
 | **Model 2** | CNN + LSTM (Temporal Baseline) | 100 | **0.83** | 0.7719 | 0.44 | 0.90 | Temporal modeling added, but underfit due to limited data |
 | **Model 3** | CNN + LSTM | 300 | **0.90** | 0.9020 | 0.68 | 0.94 | Temporal learning effective; significant jump in AUC |
 | **Model 4** | CNN + LSTM | 500 | **0.94** | **0.9506** | **0.76** | **0.96** | Excellent balance; near production-grade performance |
-| **Model 5** | CNN + LSTM (Final Expanded) | **800** | **0.95** | **0.9746** | **0.82** | **0.97** | Outstanding generalization; strong REAL recovery; approaching deployment quality |
+| **Model 5** | CNN + LSTM | **800** | **0.95** | **0.9746** | **0.82** | **0.97** | Outstanding generalization; strong REAL recovery; approaching deployment quality |
 
 ## Accuracy by Deepfake Type
 
