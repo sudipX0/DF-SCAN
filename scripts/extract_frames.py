@@ -29,7 +29,7 @@ def detect_label_from_path(video_path: str) -> str:
     """
     fake_keywords = [
         "deepfake", "faceswap", "face2face",
-        "faceshifter", "neuraltexture", "detection"
+        "faceshifter", "neuraltexture", "detection", "synthesis"
     ]
     folder = video_path.lower()
     for keyword in fake_keywords:

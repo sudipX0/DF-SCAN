@@ -1,4 +1,4 @@
-!["DFSCAN Banner"](logo.png)
+!['DFSCAN Banner'](logo.png)
 
 # DF-SCAN  
 A deepfake video detection system that determines whether a video is **real** or **fake** using deep learning.  
@@ -19,6 +19,7 @@ Hybrid **CNN + LSTM** architecture that captures
 | **Model 4** | CNN + LSTM | 500 | **0.94** | **0.9506** | **0.76** | **0.96** | Excellent balance; near production-grade performance |
 | **Model 5** | CNN + LSTM | **800** | **0.95** | **0.9746** | **0.82** | **0.97** | Outstanding generalization; strong REAL recovery; approaching deployment quality |
 | **Model 6** | CNN + LSTM | **1000** | **0.96** | **0.9830** | **0.87** | **0.98** | Production-grade reliability; nearly perfect fake detection; strong real recall; robust and stable model behavior |
+| **Model 7 (Celeb-DF Fine-tuned)** | CNN + LSTM | **Celeb-DF (980 samples)** | **0.77** | **0.8243** | **0.44** | **0.86** | Good generalization but biased toward fakes; REAL recall needs improvement |
 
 ## Accuracy by Deepfake Type
 
@@ -51,3 +52,6 @@ REAL recall (0.82) indicates a small number of genuine videos still misclassifie
 
 ### **Approaching Production Readiness**  
 At 1000 samples, DF-SCAN demonstrates stable, generalizable, and nearly saturated performance.
+
+### **Celeb-DF Fine-tuning (Model 7)**  
+When fine-tuned on Celeb-DF, DF-SCAN maintained strong FAKE detection (F1 = 0.86, AUC = 0.8243) but exhibited reduced REAL detection (F1 = 0.44) due to domain shift and dataset imbalance (REAL: 134, FAKE: 846). This indicates robust but biased generalization that can be improved through class balancing and progressive unfreezing.
