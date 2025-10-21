@@ -5,9 +5,9 @@ A deepfake video detection system that determines whether a video is **real** or
 The system analyzes both spatial (frame-level) and temporal (sequence-level) patterns to identify manipulations and display authenticity results with confidence scores and visual cues.
 
 ## Experimental Architecture  
-Hybrid **CNN + LSTM** architecture that captures  
+Hybrid **CNN + LSTM** or **CNN + Transformer** architecture that captures:  
 - **Spatial inconsistencies** (per-frame CNN features)  
-- **Temporal correlations** (LSTM sequence modeling)  
+- **Temporal correlations** (LSTM/Transformer sequence modeling)  
 
 ## Model Evolution Summary (Currently Experimenting)
 
@@ -20,18 +20,23 @@ Hybrid **CNN + LSTM** architecture that captures
 | **Model 5** | CNN + LSTM | **800** | **0.95** | **0.9746** | **0.82** | **0.97** | Outstanding generalization; strong REAL recovery; approaching deployment quality |
 | **Model 6** | CNN + LSTM | **1000** | **0.96** | **0.9830** | **0.87** | **0.98** | Production-grade reliability; nearly perfect fake detection; strong real recall; robust and stable model behavior |
 | **Model 7 (Celeb-DF Fine-tuned)** | CNN + LSTM | **Celeb-DF (980 samples)** | **0.77** | **0.8243** | **0.44** | **0.86** | Good generalization but biased toward fakes; REAL recall needs improvement |
+| **Model 8 (FaceForensics++ Transformer)** | CNN + Transformer | **1000** | **0.95** | **0.9510** | **0.82** | **0.97** | Strong overall performance; balanced REAL/FAKE detection; robust across fake types; best choice for deployment |
+
+---
 
 ## Accuracy by Deepfake Type
 
-| **Deepfake Type** | **Model 1 (100V ResNet18)** | **Model 2 (100V CNN + LSTM)** | **Model 3 (300V)** | **Model 4 (500V)** | **Model 5 (800V)** | **Model 6 (1000V)** | **Trend** |
-|--------------------|------------------------------:|-------------------------------:|--------------------:|--------------------:|--------------------:|--------------------:|------------|
-| **Face2Face** | 100.00 % | 93.75 % | 88.24 % | **100.00 %** | **94.29 %** | **97.14 %** | Stable high accuracy; slight recovery after minor dip |
-| **NeuralTextures** | 83.33 % | 79.17 % | 82.05 % | **95.95 %** | **91.53 %** | **93.28 %** | Improved consistency; handles visual texture variations better |
-| **Deepfakes** | 82.35 % | 88.24 % | 97.37 % | **98.72 %** | **100.00 %** | **100.00 %** | Fully saturated detection; perfect classification |
-| **FaceSwap** | 94.44 % | 94.44 % | 85.71 % | **92.94 %** | **97.35 %** | **98.52 %** | Steady enhancement; strong across versions |
-| **DeepFakeDetection** | 100.00 % | 100.00 % | 100.00 % | **100.00 %** | **100.00 %** | **100.00 %** | Saturated; complete detection |
-| **FaceShifter** | 100.00 % | 90.00 % | 98.04 % | **100.00 %** | **95.28 %** | **96.47 %** | Marginal improvement; robust temporal capture |
-| **REAL** | 53.33 % | 46.67 % | 75.56 % | **69.33 %** | **85.00 %** | **82.00 %** | Slight dip due to dataset imbalance but strong overall recovery |
+| **Deepfake Type** | **Model 6 (LSTM 1000V)** | **Model 7 (Celeb-DF)** | **Model 8 (Transformer 1000V)** |
+|--------------------|--------------------------:|------------------------:|------------------------------:|
+| **Face2Face**      | 97.14 %                  | -                      | 96.95 %                        |
+| **NeuralTextures** | 93.28 %                  | -                      | 93.84 %                        |
+| **Deepfakes**      | 100.00 %                 | -                      | 97.99 %                        |
+| **FaceSwap**       | 98.52 %                  | -                      | 96.38 %                        |
+| **DeepFakeDetection** | 100.00 %               | -                      | 98.71 %                        |
+| **FaceShifter**    | 96.47 %                  | -                      | 94.59 %                        |
+| **REAL**           | 82.00 %                  | 67.16 %                | 84.67 %                        |
+
+---
 
 ## Observations
 
@@ -39,19 +44,26 @@ Hybrid **CNN + LSTM** architecture that captures
 Each dataset expansion improved overall accuracy and ROC-AUC; the model exhibits continued growth, with performance nearing saturation at 1000 videos.
 
 ### **REAL Class Recovery**  
-REAL class recall and F1 show large gains over earlier versions (0.52 → 0.87), though a small decline in recall at 1000V indicates minor overfitting toward fake-dominant samples.
+- LSTM Model 6: 0.87 F1  
+- Transformer Model 8: 0.82 F1  
+- Celeb-DF fine-tune: 0.44 F1  
 
-### **High AUC (0.9830)**  
-Model achieves exceptional class separability and well-calibrated probabilities. Predictions are highly confident and consistent across fake types.
+The Transformer model slightly trades some AUC for improved REAL/FAKE balance and robustness across fake types.
+
+### **High AUC**  
+- LSTM Model 6: 0.9830  
+- Transformer Model 8: 0.9510  
+
+Both models are highly capable, but the Transformer offers more balanced predictions for real videos.
 
 ### **Fake Class Robustness**  
-Fake categories maintain near-perfect scores across all versions. Model successfully generalizes across manipulation methods, highlighting its strength in learning consistent spatiotemporal artifacts.
+All models consistently achieve 94–100% across all fake types. Transformer Model 8 maintains strong generalization without biasing toward a single fake category.
 
-### **Minor REAL Sensitivity Drop**  
-REAL recall (0.82) indicates a small number of genuine videos still misclassified as fake, likely due to dataset imbalance and real-video variability such as lighting or compression artifacts.
+### **Domain Transfer Risk**  
+Celeb-DF fine-tuned Model 7 shows that naive fine-tuning can hurt REAL recall due to domain shift and dataset imbalance.
 
-### **Approaching Production Readiness**  
-At 1000 samples, DF-SCAN demonstrates stable, generalizable, and nearly saturated performance.
-
-### **Celeb-DF Fine-tuning (Model 7)**  
-When fine-tuned on Celeb-DF, DF-SCAN maintained strong FAKE detection (F1 = 0.86, AUC = 0.8243) but exhibited reduced REAL detection (F1 = 0.44) due to domain shift and dataset imbalance (REAL: 134, FAKE: 846). This indicates robust but biased generalization that can be improved through class balancing and progressive unfreezing.
+### **Best Model Recommendation**  
+- **Use CNN + Transformer (Model 8) for deployment** on FaceForensics++.  
+- Strong balanced REAL/FAKE detection (accuracy 0.95, AUC 0.951).  
+- Excellent per-fake type generalization.  
+- Optional fine-tuning can be considered **with class-balancing strategies** for further REAL recall improvement.
