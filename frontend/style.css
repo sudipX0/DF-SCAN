@@ -152,7 +152,7 @@ body {
   display: grid;
   grid-template-columns: 420px 1fr;
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (max-width: 1200px) {
@@ -167,6 +167,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-height: 0;
+}
+
+.left-panel {
+  height: 100%;
 }
 
 /* Section styling */
@@ -180,6 +185,11 @@ body {
   padding: 24px;
   box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
+}
+
+.upload-section {
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .upload-section:hover,
@@ -220,12 +230,13 @@ body {
 .dropzone {
   border: 2px dashed var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 40px 24px;
+  padding: 32px 24px 48px 24px;
   text-align: center;
   background: var(--bg-tertiary);
   cursor: pointer;
   outline: none;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .dropzone:hover,
@@ -267,12 +278,19 @@ body {
 
 .file-info {
   margin-top: 12px;
-  padding: 12px;
-  background: rgba(22, 163, 74, 0.08);
-  border-radius: var(--radius-md);
+  padding: 0;
+  background: transparent;
+  border: none;
   color: var(--success);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 600;
   display: none;
+  position: absolute;
+  bottom: 16px;
+  left: 24px;
+  right: 24px;
+  z-index: 10;
+  text-align: center;
 }
 
 .file-info:not(:empty) {
@@ -400,15 +418,18 @@ body {
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-md);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Changed stages container to horizontal layout */
 .stages-container {
   display: flex;
   flex-direction: row;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 24px;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
 }
 
@@ -422,10 +443,11 @@ body {
 /* Show connectors in horizontal layout */
 .stage-connector {
   display: flex;
-  flex: 0 0 12px;
+  flex: 0 0 8px;
   height: 2px;
   background: var(--border-color);
-  margin: 0 -6px;
+  margin: 0;
+  align-self: center;
 }
 
 .stage-connector:last-child {
@@ -437,8 +459,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 6px;
+  padding: 12px 8px;
   border-radius: var(--radius-md);
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
@@ -447,7 +469,7 @@ body {
   color: var(--text-secondary);
   transition: all 0.3s ease;
   width: 100%;
-  min-height: 40px;
+  min-height: 44px;
   flex-direction: column;
   text-align: center;
 }
@@ -709,6 +731,21 @@ body {
   gap: 12px;
 }
 
+/* Ensure moved cards fit comfortably in the right sidebar */
+.live-sidebar .prediction-section,
+.live-sidebar .processing-indicator-section {
+  padding: 16px;
+}
+
+.live-sidebar .prediction-badge {
+  font-size: 16px;
+  padding: 14px 12px;
+}
+
+.live-sidebar .prediction-confidence .value {
+  font-size: 26px;
+}
+
 .sidebar-section {
   display: flex;
   flex-direction: column;
@@ -747,16 +784,7 @@ body {
   color: var(--text-muted);
 }
 
-/* Updated outcome background tints for light theme */
-body.outcome-real {
-  --bg-primary: #f0fdf4;
-  --bg-secondary: #f7fee7;
-}
-
-body.outcome-fake {
-  --bg-primary: #fef2f2;
-  --bg-secondary: #fef5f5;
-}
+/* Outcome theme overrides removed: keep page theme consistent regardless of prediction */
 
 /* New prediction section styling */
 .prediction-section {

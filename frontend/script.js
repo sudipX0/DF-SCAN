@@ -422,8 +422,8 @@ function handleEvent(data) {
     state.done = true
     if (els.liveStatus) els.liveStatus.textContent = "Done"
     try {
+      // No theme switching based on prediction outcome
       document.body.classList.remove("outcome-real", "outcome-fake")
-      document.body.classList.add(isFake ? "outcome-fake" : "outcome-real")
     } catch {}
   }
   if (data.done) {
@@ -459,7 +459,7 @@ function finishWithResult(result) {
   const conf = Number(result?.confidence || 0)
   const pct = Math.round(conf * 100)
   const isFake = String(label).toUpperCase() === "FAKE"
-  const badge = `<span class="prediction-badge ${isFake ? "fake" : "real"}">${isFake ? "🚨 DEEPFAKE DETECTED" : "✓ AUTHENTIC"}</span>`
+  const badge = `<span class="prediction-badge ${isFake ? "fake" : "real"}">${isFake ? "DEEPFAKE DETECTED" : "✓ AUTHENTIC"}</span>`
   const confHtml = `<div class="prediction-confidence ${isFake ? "fake" : "real"}"><span class="label">Confidence</span><span class="value">${pct}%</span></div>`
   els.predictionDisplay.innerHTML = `${badge}${confHtml}`
   els.predictionSection.hidden = false
@@ -467,8 +467,8 @@ function finishWithResult(result) {
   setProgress(100, "Done")
   if (els.liveStatus) els.liveStatus.textContent = "Done"
   try {
+    // No theme switching based on prediction outcome
     document.body.classList.remove("outcome-real", "outcome-fake")
-    document.body.classList.add(isFake ? "outcome-fake" : "outcome-real")
   } catch {}
 }
 

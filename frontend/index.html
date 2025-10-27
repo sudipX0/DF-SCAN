@@ -120,24 +120,7 @@
           </div>
         </section>
 
-        <!-- New dedicated prediction result section -->
-        <section class="prediction-section" id="predictionSection" hidden>
-          <div class="section-header">
-            <h3>Final Prediction</h3>
-          </div>
-          <div id="predictionDisplay" class="prediction-display"></div>
-        </section>
-
-        <!-- New processing indicator section -->
-        <section class="processing-indicator-section" id="processingIndicatorSection" hidden>
-          <div class="section-header">
-            <h3>Processing</h3>
-          </div>
-          <div class="processing-indicator-content">
-            <div class="spinner" id="processingIndicatorSpinner"></div>
-            <p id="processingIndicatorText" class="processing-text">Analyzing frames...</p>
-          </div>
-        </section>
+        <!-- Prediction and Processing sections moved to right sidebar for better visibility -->
 
         <!-- Result Section (kept for backwards compatibility) -->
         <section class="result-section" id="resultSection" hidden>
@@ -174,6 +157,25 @@
                   <div class="empty-state">No face detected</div>
                 </div>
               </div>
+
+              <!-- New dedicated prediction result section (moved here) -->
+              <section class="prediction-section" id="predictionSection" hidden>
+                <div class="section-header">
+                  <h3>Final Prediction</h3>
+                </div>
+                <div id="predictionDisplay" class="prediction-display"></div>
+              </section>
+
+              <!-- New processing indicator section (moved here) -->
+              <section class="processing-indicator-section" id="processingIndicatorSection" hidden>
+                <div class="section-header">
+                  <h3>Processing</h3>
+                </div>
+                <div class="processing-indicator-content">
+                  <div class="spinner" id="processingIndicatorSpinner"></div>
+                  <p id="processingIndicatorText" class="processing-text">Analyzing frames...</p>
+                </div>
+              </section>
             </div>
           </div>
         </section>
