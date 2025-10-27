@@ -413,7 +413,7 @@ function handleEvent(data) {
       const raw = data.frames[data.frames.length - 1]
       els.liveFrame.src = `data:image/jpeg;base64,${raw}`
     }
-    const badge = `<span class="prediction-badge ${isFake ? "fake" : "real"}">${isFake ? "🚨 DEEPFAKE DETECTED" : "✓ AUTHENTIC"}</span>`
+    const badge = `<span class="prediction-badge ${isFake ? "fake" : "real"}">${isFake ? "DEEPFAKE DETECTED" : "✓ AUTHENTIC"}</span>`
     const confHtml = `<div class="prediction-confidence ${isFake ? "fake" : "real"}"><span class="label">Confidence</span><span class="value">${pct}%</span></div>`
     els.predictionDisplay.innerHTML = `${badge}${confHtml}`
     els.predictionSection.hidden = false
