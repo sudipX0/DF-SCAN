@@ -1,3 +1,20 @@
+// Theme toggle functionality
+const themeToggle = document.getElementById('themeToggle')
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+const savedTheme = localStorage.getItem('theme')
+
+// Initialize theme
+if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+  document.body.classList.add('dark-theme')
+}
+
+// Toggle theme on button click
+themeToggle?.addEventListener('click', () => {
+  document.body.classList.toggle('dark-theme')
+  const isDark = document.body.classList.contains('dark-theme')
+  localStorage.setItem('theme', isDark ? 'dark' : 'light')
+})
+
 // New improved frontend with drag-and-drop, stages, progress, cancel/retry
 function detectApiBase() {
   try {

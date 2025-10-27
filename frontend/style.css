@@ -1,4 +1,4 @@
-/* Updated color scheme to light theme with dark blue accent */
+/* Light Theme (Default) */
 :root {
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
@@ -21,6 +21,26 @@
   --radius-lg: 14px;
 }
 
+/* Professional Forensics Dark Theme */
+body.dark-theme {
+  --bg-primary: #1e2738;
+  --bg-secondary: #2a3447;
+  --bg-tertiary: #364156;
+  --text-primary: #f0f4f8;
+  --text-secondary: #cbd5e0;
+  --text-muted: #90a4ae;
+  --accent-primary: #5b9dff;
+  --accent-secondary: #3b7dd6;
+  --success: #48bb78;
+  --danger: #f56565;
+  --warning: #ed8936;
+  --border-color: #3d4a5c;
+  --border-light: #4a5769;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -39,6 +59,7 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Professional navigation bar */
@@ -139,6 +160,44 @@ body {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   color: #ffffff;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+}
+
+.theme-toggle:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #ffffff;
+}
+
+.theme-toggle .sun-icon {
+  display: block;
+}
+
+.theme-toggle .moon-icon {
+  display: none;
+}
+
+body.dark-theme .theme-toggle .sun-icon {
+  display: none;
+}
+
+body.dark-theme .theme-toggle .moon-icon {
+  display: block;
 }
 
 /* Main layout structure */
