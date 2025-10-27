@@ -1,4 +1,4 @@
-!['DFSCAN Banner'](logo.png)
+!['DFSCAN Banner'](UI.png)
 
 # DF-SCAN  
 A deepfake video detection system that determines whether a video is **real** or **fake** using deep learning.  
