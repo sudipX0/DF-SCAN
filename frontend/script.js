@@ -168,12 +168,78 @@ function onFileSelected(file) {
   els.startBtn.disabled = false
   resetUI()
   if (els.uploadedVideoMain) {
+    // Primary approach: blob URL
     const url = URL.createObjectURL(file)
     els.uploadedVideoMain.src = url
+    // Attach an error handler to provide better diagnostics and try a fallback
+    const onVideoError = async () => {
+      // If the browser refuses to play the blob URL, attempt a fallback by
+      // re-creating a Blob with an explicit MIME (guessed from filename) and
+      // loading that instead. This often helps when file.type is empty.
+      console.warn("Video element reported an error while loading the selected file.")
+      try {
+        const guessed = guessMimeFromName(file.name) || file.type || "video/mp4"
+        const fixedBlob = await fileToBlobWithMime(file, guessed)
+        const fallbackUrl = URL.createObjectURL(fixedBlob)
+        els.uploadedVideoMain.src = fallbackUrl
+        // try to load/play the fallback
+        try {
+          els.uploadedVideoMain.load()
+        } catch {}
+      } catch (err) {
+        console.error("Fallback blob creation failed:", err)
+        showError("Unable to load video preview in the browser. The file may use a codec the browser doesn't support.")
+      }
+    }
+
+    // Remove any previous error listener to avoid duplicate handling
+    els.uploadedVideoMain.removeEventListener("error", els.__videoErrorHandler)
+    els.__videoErrorHandler = onVideoError
+    els.uploadedVideoMain.addEventListener("error", onVideoError)
     try {
       els.uploadedVideoMain.load()
     } catch {}
   }
+}
+
+// Helpers: guess mime from filename extension
+function guessMimeFromName(name) {
+  if (!name || typeof name !== "string") return null
+  const ext = name.split('.').pop().toLowerCase()
+  switch (ext) {
+    case 'mp4':
+    case 'm4v':
+      return 'video/mp4'
+    case 'webm':
+      return 'video/webm'
+    case 'ogv':
+      return 'video/ogg'
+    case 'mov':
+      return 'video/quicktime'
+    case 'mkv':
+      // Browsers typically don't support mkv natively
+      return 'video/x-matroska'
+    default:
+      return null
+  }
+}
+
+// Read the file as an ArrayBuffer and create a new Blob with the provided MIME
+function fileToBlobWithMime(file, mime) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader()
+    fr.onerror = () => reject(new Error('FileReader failed'))
+    fr.onload = () => {
+      try {
+        const ab = fr.result
+        const blob = new Blob([ab], { type: mime })
+        resolve(blob)
+      } catch (err) {
+        reject(err)
+      }
+    }
+    fr.readAsArrayBuffer(file)
+  })
 }
 
 // Controls
