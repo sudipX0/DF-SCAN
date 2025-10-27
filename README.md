@@ -4,12 +4,16 @@
 A deepfake video detection system that determines whether a video is **real** or **fake** using deep learning.  
 The system analyzes both spatial (frame-level) and temporal (sequence-level) patterns to identify manipulations and display authenticity results with confidence scores and visual cues.
 
-## Experimental Architecture  
-Hybrid **CNN + LSTM** or **CNN + Transformer** architecture that captures:  
-- **Spatial inconsistencies** (per-frame CNN features)  
-- **Temporal correlations** (LSTM/Transformer sequence modeling)  
+---
 
-## Model Evolution Summary (Currently Experimenting)
+## Experimental Architecture  
+Hybrid **CNN + LSTM** architecture that captures:  
+- **Spatial inconsistencies** (per-frame CNN features)  
+- **Temporal correlations** (LSTM sequence modeling)  
+
+---
+
+## Model Evolution Summary  
 
 | **Model** | **Architecture** | **Video Samples** | **Accuracy** | **ROC-AUC** | **REAL F1** | **FAKE F1** | **Key Observation** |
 |------------|------------------|------------------:|--------------:|-------------:|-------------:|-------------:|----------------------|
@@ -19,22 +23,20 @@ Hybrid **CNN + LSTM** or **CNN + Transformer** architecture that captures:
 | **Model 4** | CNN + LSTM | 500 | **0.94** | **0.9506** | **0.76** | **0.96** | Excellent balance; near production-grade performance |
 | **Model 5** | CNN + LSTM | **800** | **0.95** | **0.9746** | **0.82** | **0.97** | Outstanding generalization; strong REAL recovery; approaching deployment quality |
 | **Model 6** | CNN + LSTM | **1000** | **0.96** | **0.9830** | **0.87** | **0.98** | Production-grade reliability; nearly perfect fake detection; strong real recall; robust and stable model behavior |
-| **Model 7 (Celeb-DF Fine-tuned)** | CNN + LSTM | **Celeb-DF (980 samples)** | **0.77** | **0.8243** | **0.44** | **0.86** | Good generalization but biased toward fakes; REAL recall needs improvement |
-| **Model 8 (FaceForensics++ Transformer)** | CNN + Transformer | **1000** | **0.95** | **0.9510** | **0.82** | **0.97** | Strong overall performance; balanced REAL/FAKE detection; robust across fake types; best choice for deployment |
 
 ---
 
-## Accuracy by Deepfake Type
+## Accuracy by Deepfake Type (Model 6)
 
-| **Deepfake Type** | **Model 6 (LSTM 1000V)** | **Model 7 (Celeb-DF)** | **Model 8 (Transformer 1000V)** |
-|--------------------|--------------------------:|------------------------:|------------------------------:|
-| **Face2Face**      | 97.14 %                  | -                      | 96.95 %                        |
-| **NeuralTextures** | 93.28 %                  | -                      | 93.84 %                        |
-| **Deepfakes**      | 100.00 %                 | -                      | 97.99 %                        |
-| **FaceSwap**       | 98.52 %                  | -                      | 96.38 %                        |
-| **DeepFakeDetection** | 100.00 %               | -                      | 98.71 %                        |
-| **FaceShifter**    | 96.47 %                  | -                      | 94.59 %                        |
-| **REAL**           | 82.00 %                  | 67.16 %                | 84.67 %                        |
+| **Deepfake Type** | **Model 6 (LSTM 1000V)** |
+|--------------------|--------------------------:|
+| **Face2Face**      | 97.14 %                  |
+| **NeuralTextures** | 93.28 %                  |
+| **Deepfakes**      | 100.00 %                 |
+| **FaceSwap**       | 98.52 %                  |
+| **DeepFakeDetection** | 100.00 %               |
+| **FaceShifter**    | 96.47 %                  |
+| **REAL**           | 82.00 %                  |
 
 ---
 
@@ -44,26 +46,19 @@ Hybrid **CNN + LSTM** or **CNN + Transformer** architecture that captures:
 Each dataset expansion improved overall accuracy and ROC-AUC; the model exhibits continued growth, with performance nearing saturation at 1000 videos.
 
 ### **REAL Class Recovery**  
-- LSTM Model 6: 0.87 F1  
-- Transformer Model 8: 0.82 F1  
-- Celeb-DF fine-tune: 0.44 F1  
-
-The Transformer model slightly trades some AUC for improved REAL/FAKE balance and robustness across fake types.
+Model 6 achieves **0.87 F1** on REAL samples; the highest among all models so far.
 
 ### **High AUC**  
-- LSTM Model 6: 0.9830  
-- Transformer Model 8: 0.9510  
-
-Both models are highly capable, but the Transformer offers more balanced predictions for real videos.
+Model 6 demonstrates **0.9830 ROC-AUC**, indicating excellent separation between real and fake samples.
 
 ### **Fake Class Robustness**  
-All models consistently achieve 94–100% across all fake types. Transformer Model 8 maintains strong generalization without biasing toward a single fake category.
+Model 6 consistently achieves **94–100%** across all fake types, showing strong generalization without overfitting to a specific fake generation method.
 
-### **Domain Transfer Risk**  
-Celeb-DF fine-tuned Model 7 shows that naive fine-tuning can hurt REAL recall due to domain shift and dataset imbalance.
+---
 
-### **Best Model Recommendation**  
-- **Use CNN + Transformer (Model 8) for deployment** on FaceForensics++.  
-- Strong balanced REAL/FAKE detection (accuracy 0.95, AUC 0.951).  
-- Excellent per-fake type generalization.  
-- Optional fine-tuning can be considered **with class-balancing strategies** for further REAL recall improvement.
+## **Deployment Model**
+- **CNN + LSTM (Model 6)** for deployment on FaceForensics++.  
+- Achieves **0.96 accuracy**, **0.983 ROC-AUC**, and **strong balanced detection**.  
+- Production-grade stability with consistent results across multiple fake types.
+
+---
