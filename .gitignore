@@ -222,3 +222,6 @@ backend/processed_videos/
 backend/uploaded_videos/
 models/
 backend/temp/
+
+# UV
+uv.lock

@@ -5,84 +5,173 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DF-SCAN - Deepfake Detection</title>
   <link rel="stylesheet" href="style.css">
-  <meta name="color-scheme" content="dark light">
+  <meta name="color-scheme" content="dark">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' ry='12' fill='%232563eb'/%3E%3Ctext x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, Helvetica, sans-serif' font-size='28' fill='white'%3EDF%3C/text%3E%3C/svg%3E" />
-  
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' ry='12' fill='%231e40af'/%3E%3Ctext x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, Helvetica, sans-serif' font-size='28' fill='%23ffffff' font-weight='bold'%3EDF%3C/text%3E%3C/svg%3E" />
 </head>
 <body>
-  <header class="app-header container">
-    <h1>DF-SCAN</h1>
-    <p class="subtitle">Upload a video to detect deepfakes with live progress</p>
-  </header>
-
-  <div class="layout container">
-    <div class="left-pane">
-      <section class="uploader">
-        <div id="dropzone" class="dropzone" tabindex="0">
-          <input id="fileInput" type="file" accept="video/*" hidden />
-          <div class="drop-hint">
-            <strong>Drag & drop</strong> a video here or
-            <button id="browseBtn" class="btn">Browse</button>
-          </div>
-          <div id="fileInfo" class="file-info"></div>
+  <!-- Professional navigation bar with GitHub button -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <div class="logo-icon">DF</div>
+        <div class="brand-text">
+          <h1>DF-SCAN</h1>
+          <p class="brand-tagline">Scan.Detect.Verify</p>
         </div>
-
-        <div class="controls">
-          <button id="startBtn" class="btn primary" disabled>Start Scan</button>
-          <button id="cancelBtn" class="btn danger" disabled>Cancel</button>
-          <button id="clearBtn" class="btn" disabled>Clear</button>
-          <button id="retryBtn" class="btn" hidden>Retry</button>
-        </div>
-
-        <div id="errorBanner" class="error-banner" hidden></div>
-      </section>
-
-      <section class="progress">
-        <div class="stages">
-          <span id="stage-frames" class="stage-badge pending">Frames</span>
-          <span id="stage-faces" class="stage-badge pending">Faces</span>
-          <span id="stage-inference" class="stage-badge pending">Inference</span>
-        </div>
-        <div class="progressbar">
-          <div id="progressFill" class="progress-fill" style="width: 0%"></div>
-        </div>
-        <div id="progressText" class="progress-text">Idle</div>
-      </section>
-
-      <section class="result" id="resultSection" hidden>
-        <h3>Result</h3>
-        <div id="resultText" class="result-text"></div>
-      </section>
+      </div>
+      <div class="nav-links">
+        <a href="#" class="nav-link">Docs</a>
+        <a href="#" class="nav-link">About</a>
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="nav-link github-btn" title="View on GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v 3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
     </div>
+  </nav>
 
-    <div class="right-pane">
-      <section class="live-view">
-        <div class="live-header">
-          <h3>Live Detection</h3>
-        </div>
-        <div class="live-flex">
-          <div class="live-frame-wrap">
-            <img id="liveFrame" alt="Live frame" />
-            <div id="liveStatus" class="live-status">Idle</div>
+  <!-- Main content area with improved layout -->
+  <main class="main-container">
+    <div class="content-wrapper">
+      <!-- Left Panel: Upload & Controls -->
+      <div class="left-panel">
+        <section class="upload-section">
+          <div class="section-header">
+            <h2>Upload Video</h2>
           </div>
-          <div class="live-side">
-            <div class="side-label">Detected face</div>
-            <div class="live-current-crop" id="liveCurrentCrop"></div>
+
+          <div id="dropzone" class="dropzone" tabindex="0">
+            <input id="fileInput" type="file" accept="video/*" hidden />
+            <div class="dropzone-content">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <strong>Drag & drop</strong> your video here
+              <span class="or-text">or</span>
+              <button id="browseBtn" class="btn btn-secondary">Browse Files</button>
+              <p class="dropzone-hint">Drag and drop or browse to select a video file</p>
+            </div>
+            <div id="fileInfo" class="file-info"></div>
           </div>
-        </div>
-        <div class="video-preview">
-          <h4 style="margin:10px 0 6px; color: var(--muted);">Uploaded video preview</h4>
-          <video id="uploadedVideoMain" controls muted playsinline style="width:100%; max-height:240px; background:#000; border-radius:8px;"></video>
-        </div>
-      </section>
+
+          <div class="controls-group">
+            <button id="startBtn" class="btn btn-primary btn-lg" disabled>
+              <span class="btn-icon">▶</span>
+              Start Scan
+            </button>
+            <button id="cancelBtn" class="btn btn-danger" disabled>Cancel</button>
+            <button id="clearBtn" class="btn btn-secondary" disabled>Clear</button>
+            <button id="retryBtn" class="btn btn-secondary" hidden>Retry</button>
+          </div>
+
+          <div id="errorBanner" class="error-banner" hidden></div>
+        </section>
+
+        <!-- Progress Section -->
+        <section class="progress-section">
+          <div class="section-header">
+            <h3>Processing Status</h3>
+          </div>
+          <div class="stages-container">
+            <div class="stage-item">
+              <div id="stage-frames" class="stage-badge pending">
+                <span class="stage-dot"></span>
+                <span class="stage-label">Extract Frames</span>
+              </div>
+            </div>
+            <div class="stage-connector"></div>
+            <div class="stage-item">
+              <div id="stage-faces" class="stage-badge pending">
+                <span class="stage-dot"></span>
+                <span class="stage-label">Detect Faces</span>
+              </div>
+            </div>
+            <div class="stage-connector"></div>
+            <div class="stage-item">
+              <div id="stage-inference" class="stage-badge pending">
+                <span class="stage-dot"></span>
+                <span class="stage-label">Predict</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-container">
+            <div class="progressbar">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <div id="progressText" class="progress-text">Idle</div>
+          </div>
+        </section>
+
+        <!-- New dedicated prediction result section -->
+        <section class="prediction-section" id="predictionSection" hidden>
+          <div class="section-header">
+            <h3>Final Prediction</h3>
+          </div>
+          <div id="predictionDisplay" class="prediction-display"></div>
+        </section>
+
+        <!-- New processing indicator section -->
+        <section class="processing-indicator-section" id="processingIndicatorSection" hidden>
+          <div class="section-header">
+            <h3>Processing</h3>
+          </div>
+          <div class="processing-indicator-content">
+            <div class="spinner" id="processingIndicatorSpinner"></div>
+            <p id="processingIndicatorText" class="processing-text">Analyzing frames...</p>
+          </div>
+        </section>
+
+        <!-- Result Section (kept for backwards compatibility) -->
+        <section class="result-section" id="resultSection" hidden>
+          <div class="section-header">
+            <h3>Detection Result</h3>
+          </div>
+          <div id="resultText" class="result-display"></div>
+        </section>
+      </div>
+
+      <!-- Right Panel: Live Detection -->
+      <div class="right-panel">
+        <section class="live-section">
+          <div class="section-header">
+            <h3>Live Detection</h3>
+            <div id="liveStatus" class="live-status-badge">Idle</div>
+          </div>
+
+          <div class="video-preview-section">
+            <h4 class="preview-title">Video Preview</h4>
+            <video id="uploadedVideoMain" controls muted playsinline class="video-preview"></video>
+          </div>
+
+          <div class="live-content">
+            <div class="live-frame-container">
+              <img id="liveFrame" alt="Live detection frame" class="live-frame" />
+              <div class="frame-overlay"></div>
+            </div>
+
+            <div class="live-sidebar">
+              <div class="sidebar-section">
+                <h4 class="sidebar-title">Current Face</h4>
+                <div class="live-current-crop" id="liveCurrentCrop">
+                  <div class="empty-state">No face detected</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
-  </div>
+  </main>
 
-  <script src="script.js"></script>
-  <!-- Legacy elements kept hidden for backwards compat -->
+  <!-- Legacy hidden elements for backwards compatibility -->
   <div style="display:none">
     <input type="file" id="videoInput" accept="video/*">
     <button id="scanBtn">Upload & Scan</button>
@@ -93,6 +182,7 @@
     <div id="finalResult" class="final-result"></div>
     <video id="uploadedVideo" width="480" height="270" controls style="display:none;"></video>
   </div>
-  
+
+  <script src="script.js"></script>
 </body>
 </html>
