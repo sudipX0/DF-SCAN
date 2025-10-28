@@ -93,7 +93,7 @@ docker run -d \
   --name df-scan \
   -p 8000:8000 \
   -v df-scan-temp:/app/backend/temp \
-  sudipxo/df-scan:latest
+  sudipxo/df-scan:v1.1.0
 ```
 
 #### Building from Source
