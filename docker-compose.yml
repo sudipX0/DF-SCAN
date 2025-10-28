@@ -1,6 +1,6 @@
 services:
   df-scan:
-    image: sudipxo/df-scan:latest
+    image: sudipxo/df-scan:v1.1.0
     container_name: df-scan
     ports:
       - "8000:8000"
