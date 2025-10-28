@@ -63,7 +63,7 @@ Model 6 consistently achieves **94–100%** across all fake types, showing stron
 
 ---
 
-## Deployment
+## Running & Deployment
 
 ### Docker Deployment
 
