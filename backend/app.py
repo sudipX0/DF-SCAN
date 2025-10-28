@@ -24,7 +24,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = VideoResNetLSTM(pretrained=False).to(device)
-model.load_state_dict(torch.load("models/production1000_temporal_model.pth", map_location=device))
+model.load_state_dict(torch.load("models/baseline800_temporal_model.pth", map_location=device))
 model.eval()
 
 progress_messages: Dict[str, Dict[str, Any]] = {}

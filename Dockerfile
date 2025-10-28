@@ -2,8 +2,7 @@
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PYTHONUNBUFFERED=1
 
 # Install OS deps (build tools + runtime libs for OpenCV/Torch)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -23,15 +22,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:${PATH}"
 
-# Upgrade pip tooling (verbose)
-RUN pip install -v --upgrade pip setuptools wheel
-
 # Workdir
 WORKDIR /app
 
-# Install Python deps in venv (verbose, layer-cached)
+# Install Python deps with cache mount (speeds up rebuilds)
 COPY requirements.txt ./requirements.txt
-RUN pip install -v -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements.txt
 
 # Copy source
 COPY backend ./backend
