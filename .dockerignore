@@ -1,0 +1,36 @@
+# VCS
+.git
+.gitignore
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Build/coverage
+build/
+dist/
+.eggs/
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS/IDE
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Not needed in image
+node_modules/
+
+# Avoid copying previous runtime data (folder will be recreated in image)
+backend/temp/*

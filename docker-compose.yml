@@ -1,0 +1,18 @@
+services:
+  df-scan:
+    image: sudipxo/df-scan:v1.0.0
+    container_name: df-scan
+    ports:
+      - "8000:8000"
+    volumes:
+      - df-scan-temp:/app/backend/temp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  df-scan-temp:
