@@ -84,7 +84,7 @@ if [ $? -eq 0 ]; then
     echo "   docker pull ${FULL_IMAGE}:latest"
     echo ""
     echo "Or run with docker-compose:"
-    echo "   docker-compose up -d"
+    echo "   docker compose up -d"
     echo "================================================"
 else
     echo "❌ Push failed!"
