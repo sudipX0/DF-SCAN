@@ -20,12 +20,25 @@ def predict_from_faces(model, faces_dir, device):
         img = Image.open(fpath).convert("RGB")
         inputs.append(val_transform(img))
     inputs = torch.stack(inputs).to(device)
+    # Temperature scaling and thresholding
+    T = 1.58
+    FAKE_THRESHOLD = 0.58
     with torch.no_grad():
-        outputs = model(inputs.unsqueeze(0))  # batch_size=1
-        probs = torch.softmax(outputs, dim=1)
-        conf, pred = torch.max(probs, dim=1)
-    label = "FAKE" if pred.item()==1 else "REAL"
-    return {"prediction": label, "confidence": float(conf.item())}
+        outputs = model(inputs.unsqueeze(0))  # batch_size=1, logits
+        # apply temperature scaling: divide logits by T before softmax
+        logits_scaled = outputs / T
+        probs = torch.softmax(logits_scaled, dim=1)
+        # compute per-class probabilities
+        real_prob = probs[0, 0].item()
+        fake_prob = probs[0, 1].item()
+        # Use threshold for declaring FAKE, otherwise REAL
+        if fake_prob >= FAKE_THRESHOLD:
+            label = "FAKE"
+            conf = fake_prob
+        else:
+            label = "REAL"
+            conf = real_prob
+    return {"prediction": label, "confidence": float(conf)}
 
 
 def predict_image(model, image_path, device):
@@ -35,7 +48,17 @@ def predict_image(model, image_path, device):
     x = val_transform(img).unsqueeze(0).unsqueeze(0).to(device)  # [1,1,3,224,224]
     with torch.no_grad():
         logits = model(x)
-        probs = torch.softmax(logits, dim=1)
-        conf, pred = torch.max(probs, dim=1)
-    label = "FAKE" if pred.item() == 1 else "REAL"
-    return {"prediction": label, "confidence": float(conf.item())}
+        # Temperature scaling and thresholding
+        T = 1.58
+        FAKE_THRESHOLD = 0.58
+        logits_scaled = logits / T
+        probs = torch.softmax(logits_scaled, dim=1)
+        real_prob = probs[0, 0].item()
+        fake_prob = probs[0, 1].item()
+        if fake_prob >= FAKE_THRESHOLD:
+            label = "FAKE"
+            conf = fake_prob
+        else:
+            label = "REAL"
+            conf = real_prob
+    return {"prediction": label, "confidence": float(conf)}

@@ -26,17 +26,37 @@ Hybrid **CNN + LSTM** architecture that captures:
 
 ---
 
+## Calibrated Model Performance (Temperature-Scaled + Best Threshold)
+
+- **Temperature Scaling** applied: T = 1.58  
+- **Optimal probability threshold (FAKE)**: 0.58  
+
+| Metric | Original Model 6 | Calibrated Model 6 |
+|--------|-----------------|----------------|
+| Accuracy | 0.9600 | 0.9686 |
+| ROC-AUC | 0.9830 | 0.9830 |
+| REAL F1 | 0.87 | 0.89 |
+| FAKE F1 | 0.98 | 0.9817 |
+| Brier Score | 0.0276 | 0.0274 |
+
+**Observation:**  
+- Calibration slightly improved overall accuracy and REAL class F1.  
+- FAKE detection remains robust and highly accurate.  
+- Provides better confidence estimates (probabilities) suitable for downstream thresholding and decision-making.
+
+---
+
 ## Accuracy by Deepfake Type (Model 6)
 
-| **Deepfake Type** | **Model 6 (LSTM 1000V)** |
-|--------------------|--------------------------:|
-| **Face2Face**      | 97.14 %                  |
-| **NeuralTextures** | 93.28 %                  |
-| **Deepfakes**      | 100.00 %                 |
-| **FaceSwap**       | 98.52 %                  |
-| **DeepFakeDetection** | 100.00 %               |
-| **FaceShifter**    | 96.47 %                  |
-| **REAL**           | 82.00 %                  |
+| **Deepfake Type** | **Model 6 (1000V)** | **Calibrated Model 6** |
+|--------------------|--------------------------:|-------------------:|
+| **Face2Face**      | 97.14 %                  | 97.14 %            |
+| **NeuralTextures** | 93.28 %                  | 93.28 %            |
+| **Deepfakes**      | 100.00 %                 | 100.00 %           |
+| **FaceSwap**       | 98.52 %                  | 98.52 %            |
+| **DeepFakeDetection** | 100.00 %               | 100.00 %           |
+| **FaceShifter**    | 96.47 %                  | 96.47 %            |
+| **REAL**           | 82.00 %                  | 87.00 %            |
 
 ---
 
