@@ -19,13 +19,13 @@ docker login
 
 ```bash
 # Build the image
-docker build -t sudipxo/df-scan:test .
+docker build -t sudipxo/df-scan:dev .
 
 # Run locally to test
-docker run -p 8000:8000 sudipxo/df-scan:test
+docker run -p 8000:8000 sudipxo/df-scan:dev
 
 # Or use docker-compose
-docker-compose up
+docker compose up
 ```
 
 ## Manual Build & Push Commands
